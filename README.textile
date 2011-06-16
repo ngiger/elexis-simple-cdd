@@ -1,0 +1,37 @@
+h1. Create CD for bootstrapping an Elexis server
+
+Here you find several rake tasks to create ISO-images for
+a Elexis server
+
+The CD will contains Debian squeeze with some initial
+packages used for bootstrapping via puppet.
+
+The initial configuration comes from a client (e.g.
+a general practioner) specific git repository which 
+contains definitions for the different nodes (virtual
+machine, client PCs, thin clients, etc).
+
+It will reference via git submodules a number of puppet
+modules.
+
+To use it do the following.
+
+# clone this repository
+# create a client configuration or clone the elexis-demo-servet
+# @rake puppet_vm['../path/to/client_config_repository']@
+
+Wait a few minutes and you will have a CD ready to install.
+
+Once you have, copy it to your archivista VM-server, e.g.
+@scp images/debian-unstable-i386-CD-1.iso root@avvm:/var/lib/vz/template/iso/@
+
+Now we are ready to create the templates for the various possible
+VM-machines. We need to ssh into the avvm  and execute the following command:
+scp gen_elexis_vm.sh root@avvm:
+ssh root@avvm bash ./gen_elexis_vm.sh
+
+h2. Customization
+
+Have a look at the rakefile and puppet_vm.rb to adapt
+some global variables (e.g. proxy servers) to you needs.
+
