@@ -7,6 +7,7 @@ Modules={
 # 'cron'=> 'git://puppet-modules.git.puzzle.ch/module-cron.git', 
 # 'cups'=> 'git://puppet-modules.git.puzzle.ch/module-cups.git', 
 'dnsmasq'=> 'git://github.com/ngiger/puppet-dnsmasq.git',
+'elexis'=> 'git://github.com/ngiger/puppet-elexis.git',
 # 'git'=> 'git://puppet-modules.git.puzzle.ch/module-git.git', 
 # 'java'=> 'git://puppet-modules.git.puzzle.ch/module-java.git', 
 # 'logrotate'=> 'git://puppet-modules.git.puzzle.ch/module-logrotate.git', 
@@ -21,7 +22,7 @@ Modules={
 # 'sshjump'=> 'git://puppet-modules.git.puzzle.ch/module-sshjump.git', 
 # 'sudo'=> 'git://puppet-modules.git.puzzle.ch/module-sudo.git', 
 # 'tftp'=> 'git://puppet-modules.git.puzzle.ch/module-tftp.git', 
-'user'=> 'git://puppet-modules.git.puzzle.ch/module-user.git', 
+# 'user'=> 'git://puppet-modules.git.puzzle.ch/module-user.git', 
 # 'webhosting'=> 'git://puppet-modules.git.puzzle.ch/module-webhosting.git',
 'x2go'=> 'git://github.com/ngiger/puppet-x2go.git',
 }
