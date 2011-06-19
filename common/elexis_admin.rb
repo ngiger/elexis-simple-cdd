@@ -21,6 +21,14 @@ d-i partman/mount_style select uuid
 #d-i console-tools/archs select at
 d-i     console-data/keymap/template/layout     select  Swiss
 d-i     console-data/keymap/family      select  qwertz
+d-i     console-keymaps-at/keymap       select  sg-latin1
+d-i     debian-installer/keymap string  sg-latin1
+
+# choose-mirror-bin       mirror/http/proxy       string  http://fest:3142/
+# choose-mirror-bin       mirror/http/directory   string  /debian/
+# choose-mirror-bin       mirror/http/countries   select  CH
+# choose-mirror-bin       mirror/ftp/proxy        string
+# choose-mirror-bin       mirror/no-default       boolean true
 
 EOF
 
@@ -54,6 +62,7 @@ pciutils
 usbutils
 
 puppet
+libaugeas-ruby
 # Added to fix error when demanding puppet
 libruby
 

@@ -1,8 +1,23 @@
 #!/bin/env ruby
 # These values reflect my environment, please adapt it to suit your needs
-APPROX_SERVER="http://fest:9999/debian/"
-OptRoot='/opt'
-ARCH="i386" # i386,amd64,ppc,ppc64 or whatever Debian supports
+# by creating a file options.rb
+OptFile = "options.rb" if !defined?(OptFile)
+if File.exists?(OptFile)
+  puts "Reading options from #{OptFile}"
+  load OptFile
+else
+  # default options
+  InitialPassword="elexisTest"                                 
+  InitialUser="elexis"                                   
+  AdminEmail="nobody@nobody.nowhere"              
+  AdminPuppet="git://github.com/ngiger/elexis-admin.git" 
+  PuppetClient="git://github.com/ngiger/puppet-client.git" 
+  APPROX_SERVER="http://localhost:9999/debian/"
+  ARCH="i386" # i386,amd64,ppc,ppc64 or whatever Debian supports
+  # if you change the architecture, throw away the content of the tmp sub-directory
+end
+
+
 ENV['ARCH']=ARCH
 
 # net/scp does not work
@@ -10,8 +25,6 @@ ENV['ARCH']=ARCH
 # Also puppet had problems installing net-scp gem (I am running jruby)
 require 'fileutils'
 # need to expand search path for our directory to enable reading conf files
-
-desc "Prepare simple_cdd environment in #{OptRoot}"
 
 class SimpleCddConf
   @@allConfs = Hash.new
@@ -40,12 +53,11 @@ class SimpleCddConf
 end
 
 
-def runSimpleCdd(name, opts=nil)
+def runSimpleCdd(name)
   # FileUtils.rm_rf('profiles')
   FileUtils.makedirs('profiles')
-  $opts = opts
-  require "#{Dir.pwd}/#{name}" # reads in name.rb
   cnf = SimpleCddConf.get(name)
+  puts cnf.inspect
   cnf.conf+="profiles=\"#{name}\"\n"
   cnf.conf+="debian_mirror=\"#{APPROX_SERVER}\"\n"
   cnf.conf+="wget_debian_mirror=\"#{APPROX_SERVER}\"\n"
@@ -69,7 +81,7 @@ def runSimpleCdd(name, opts=nil)
   end
 
   # ENV['cd_img']="myname-#{cnf.release}.iso"
-  cmd = "wget_debian_mirror=#{APPROX_SERVER} time build-simple-cdd --dist #{cnf.release} \
+  cmd = "wget_debian_mirror=#{APPROX_SERVER} build-simple-cdd --dist #{cnf.release} \
 --keyboard #{keyboard} --locale  #{cnf.locale} \
 --conf profiles/#{name}.conf  \
 --profiles #{name} \
@@ -81,25 +93,26 @@ def runSimpleCdd(name, opts=nil)
   puts "kvm -hda #{name}.qcow2 -cdrom debian-testing-i386-CD-1.iso -boot d"
 end
 
-def add_iso_target(name)
-  desc "Produces ISO #{name}"
-  task name => [ 'simple_cdd_env'] do
-    datei = "#{name}.rb"
-    if File.exists?(datei) then
-      p "origin #{datei} exists locally"
-    else
-      p "missing #{datei}!!"
-      exit 2
-    end
-    runSimpleCdd(name)
-  end
+desc "elexis_server_iso Create ISO create or adapt options.rb to you likeing"
+task :elexis_server_iso do
+  require "#{Dir.pwd}/puppet_vm"
+  gen_elexis_server_cnf('elexis_server_iso')
+  runSimpleCdd('elexis_server_iso')
 end
 
-desc "puppet_vm[\'../path/to/client/repos\'] Create ISO based on ./path/to/client/repos"
-task :puppet_vm, :client do |t, args|
-  puts args.inspect
-  cmd = "git archive -o client.zip --remote=#{args['client']} HEAD"
-  system(cmd)
-  runSimpleCdd('puppet_vm', 'client.zip')
-end
-
+# last time tested June 17th 2011 like this!
+TestRoot = <<EOF
+cd /mnt/images
+sudo -u root -s -H
+debootstrap squeeze squeeze-root http://fest:3142/debian/
+#	  [ ... watch it download the whole system ]
+echo "proc squeeze-root/proc proc defaults 0 0" >> /etc/fstab
+mount proc squeeze-root/proc -t proc
+echo "sysfs squeeze-root/sys sysfs defaults 0 0" >> /etc/fstab
+mount sysfs squeeze-root/sys -t sysfs
+cp /etc/hosts squeeze-root/etc/hosts
+chroot squeeze-root /bin/bash
+aptitude install git rake simple-cdd
+time rake elexis_server_iso 
+# real    1m55.045s
+EOF
